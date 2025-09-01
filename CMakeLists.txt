@@ -11,8 +11,8 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Compiler flags
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra -Wpedantic")
+# Compiler flags (base flags only, target-specific warnings added later)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native")
 
 # Output directories
@@ -50,13 +50,18 @@ if(NOT glm_FOUND)
     FetchContent_MakeAvailable(glm)
 endif()
 
-# GLAD - OpenGL loader (we'll generate/add this later)
-# For now, we'll add a placeholder for GLAD
-set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/glad)
-if(EXISTS ${GLAD_DIR})
-    add_library(glad STATIC ${GLAD_DIR}/src/glad.c)
-    target_include_directories(glad PUBLIC ${GLAD_DIR}/include)
-endif()
+# GLAD - OpenGL loader
+include(FetchContent)
+FetchContent_Declare(
+    glad
+    GIT_REPOSITORY https://github.com/Dav1dde/glad.git
+    GIT_TAG v0.1.36
+)
+FetchContent_MakeAvailable(glad)
+
+# Create GLAD library
+add_library(glad_target STATIC ${glad_SOURCE_DIR}/src/glad.c)
+target_include_directories(glad_target PUBLIC ${glad_SOURCE_DIR}/include)
 
 # Include directories
 include_directories(
@@ -74,21 +79,26 @@ file(GLOB_RECURSE SOURCES
 if(SOURCES)
     add_executable(lidar_viz ${SOURCES})
     
+    # Add target-scoped warnings
+    target_compile_options(lidar_viz PRIVATE -Wall -Wextra -Wpedantic)
+    
     # Link libraries
     target_link_libraries(lidar_viz
         ${OPENGL_LIBRARIES}
         glfw
+        glad_target
         ${CMAKE_THREAD_LIBS_INIT}
     )
-    
-    if(TARGET glad)
-        target_link_libraries(lidar_viz glad)
-    endif()
     
     if(TARGET glm::glm)
         target_link_libraries(lidar_viz glm::glm)
     else()
         target_link_libraries(lidar_viz glm)
+    endif()
+    
+    # macOS-specific framework linking for vendored GLFW
+    if(APPLE)
+        target_link_libraries(lidar_viz "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
     endif()
 endif()
 

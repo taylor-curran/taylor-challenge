@@ -334,6 +334,8 @@ int main(int argc, char** argv)
     // Clean up
     close(udpSockPose);
     close(udpSockLidar);
+    close(udpSockTelem);
+    close(cmdSock);
     fin.close();
 
     std::cout << "Finished streaming rover " << roverID << " data.\n";

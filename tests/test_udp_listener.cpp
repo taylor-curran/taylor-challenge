@@ -48,6 +48,12 @@ void listen_pose(int rover_id) {
         std::cerr << "POSE: Failed to create socket" << std::endl;
         return;
     }
+    
+    // Socket quality-of-life improvements
+    int yes = 1;
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    int buf = 4 * 1024 * 1024; // 4MB buffer
+    setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &buf, sizeof(buf));
 
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
@@ -98,6 +104,12 @@ void listen_lidar(int rover_id) {
         std::cerr << "LIDAR: Failed to create socket" << std::endl;
         return;
     }
+    
+    // Socket quality-of-life improvements
+    int yes = 1;
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+    int buf = 4 * 1024 * 1024; // 4MB buffer
+    setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &buf, sizeof(buf));
 
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));

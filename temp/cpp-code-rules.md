@@ -2,9 +2,11 @@
 
 **Always do this**
 
--   **RAII only.** No raw `new/delete`, `malloc/free`, or owning raw pointers. Use values, `std::unique_ptr`, `std::shared_ptr` only when shared ownership is required.
+-   **RAII only.** No raw `new/delete`, `malloc/free`, or owning raw pointers. Use values, `std::unique_ptr`, `std::shared_ptr` only when shared ownership is required. **Always close file descriptors/sockets in destructors or cleanup blocks.**
     
 -   **Const & types.** Prefer `const`, `enum class`, and fixed-width ints (`std::uint32_t`). Avoid implicit narrowing; mark single-arg ctors `explicit`.
+
+-   **Header hygiene.** Headers must be self-contained—include all dependencies explicitly. Never rely on transitive includes. Use include guards or `#pragma once`.
     
 -   **Rule of 5/0.** If a type manages a resource, define/`=delete` copy/move ops intentionally; never rely on accidental defaults.
     
@@ -37,6 +39,8 @@
 **Networking (UDP)**
 
 -   **Non-blocking sockets.** Use `recvfrom` in non-blocking mode; handle `EWOULDBLOCK`.
+
+-   **Socket configuration.** Always set `SO_REUSEADDR` for quick restarts. Set `SO_RCVBUF` to 4MB+ for high-throughput streams to reduce drop risk.
     
 -   **Packets.** Treat each datagram atomically; validate byte count before parse; include a **version**, **sequence**, and **timestamp**; never assume in-order delivery.
     
@@ -101,7 +105,7 @@
 
 **Build & tooling (non-negotiable)**
 
--   Compile flags: `-O2` (release) / `-g -O0` (dev) with `-Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow -Wnon-virtual-dtor`.
+-   Compile flags: `-O2` (release) / `-g -O0` (dev). Use **target-scoped** warnings (`target_compile_options`) not global flags: `-Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow -Wnon-virtual-dtor`.
     
 -   Sanitizers in CI/dev: Address + Undefined (`-fsanitize=address,undefined`), ThreadSanitizer for concurrency tests.
     
