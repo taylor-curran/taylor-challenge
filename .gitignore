@@ -1,0 +1,38 @@
+# Compiled binaries
+rover_emulator
+tests/test_udp_listener
+
+# CMake build directory
+build/
+cmake-build-*/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.out
+
+# External dependencies (if downloaded)
+external/
+
+# Large data files
+data/*.dat
+data/*.tar.xz
+data/*.xz
+
+
