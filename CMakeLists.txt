@@ -56,12 +56,16 @@ FetchContent_Declare(
     glad
     GIT_REPOSITORY https://github.com/Dav1dde/glad.git
     GIT_TAG v0.1.36
+    CMAKE_ARGS -DCMAKE_POLICY_DEFAULT_CMP0048=NEW
 )
-FetchContent_MakeAvailable(glad)
-
-# Create GLAD library
-add_library(glad_target STATIC ${glad_SOURCE_DIR}/src/glad.c)
-target_include_directories(glad_target PUBLIC ${glad_SOURCE_DIR}/include)
+# Use a custom approach to avoid CMake version issues with GLAD
+FetchContent_GetProperties(glad)
+if(NOT glad_POPULATED)
+    FetchContent_Populate(glad)
+    # Don't add subdirectory, just build GLAD manually
+    add_library(glad_target STATIC ${glad_SOURCE_DIR}/src/glad.c)
+    target_include_directories(glad_target PUBLIC ${glad_SOURCE_DIR}/include)
+endif()
 
 # Include directories
 include_directories(
@@ -106,6 +110,15 @@ endif()
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_udp_listener.cpp)
     add_executable(test_udp_listener tests/test_udp_listener.cpp)
     target_link_libraries(test_udp_listener ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
+# Add test executable for UDP pose receiver
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_pose_receiver.cpp)
+    add_executable(test_pose_receiver 
+        tests/test_pose_receiver.cpp
+        src/udp_receiver.cpp
+    )
+    target_link_libraries(test_pose_receiver ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 # Print configuration summary

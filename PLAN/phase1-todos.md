@@ -29,7 +29,7 @@
   - **Build command**: `make build-viz`
   - **Test passed**: `./build/bin/lidar_viz`
 
-- [ ] **P1.2** Define data structures matching emulator
+- [x] **P1.2** Define data structures matching emulator ✅
   ```cpp
   // Match binary layout from README.md lines 81-92, 105-122
   struct PosePacket { double timestamp; float posX/Y/Z; float rotX/Y/Zdeg; }
@@ -38,24 +38,77 @@
   struct VehicleTelem { double timestamp; uint8_t buttonStates; }
   ```
   - Use `#pragma pack(push, 1)` for binary compatibility
+  
+  **Completed Steps:**
+  - Created `include/udp_packet_structures.h` with all packet structures
+  - Defined PosePacket (32 bytes) matching emulator binary layout
+  - Defined LidarPacketHeader (20 bytes) and LidarPoint (12 bytes)
+  - Defined LidarPacket with header + 100 points max (1220 bytes total)
+  - Defined VehicleTelem for button states (9 bytes)
+  - Used `#pragma pack(push, 1)` to ensure exact binary compatibility
 
-- [ ] **P1.3** Implement UDP receiver class
+- [x] **P1.3** Implement UDP receiver class ✅
   - Create `UDPReceiver` class with non-blocking socket
   - Bind to port 9001 (pose) for rover 1
   - Test: Receive and print PosePacket timestamps/positions
+  
+  **Completed Steps:**
+  - Created `include/udp_receiver.h` with UDPReceiver class definition
+  - Implemented `src/udp_receiver.cpp` with non-blocking socket support
+  - Created `tests/test_pose_receiver.cpp` to validate pose packet reception
+  - Successfully tested receiving pose packets at 10Hz from rover emulator
+  - Verified correct packet structure (32 bytes) and data parsing
 
-- [ ] **P1.4** Add LiDAR chunk reassembly
+- [x] **P1.4** Add LiDAR chunk reassembly ✅
   - Bind second socket to port 10001 (LiDAR)
   - Create `LidarAssembler` class to buffer chunks by timestamp
   - Handle out-of-order chunks (use std::map<timestamp, chunks>)
   - Test: Print "Full scan received: N points" when all chunks arrive
+  
+  **Completed Steps:**
+  - Created `include/lidar_assembler.h` with thread-safe chunk assembly
+  - Implemented `src/lidar_assembler.cpp` with out-of-order chunk handling
+  - Created `tests/test_lidar_assembler.cpp` to validate reassembly
+  - Successfully tested receiving and assembling 10 chunks per scan (1000 points total)
+  - Added cleanup for stale partial scans (2-second timeout)
 
-- [ ] **P1.5** Coordinate transformation pipeline
+- [x] **P1.5** Coordinate transformation pipeline
   - Create `Transform` class using GLM
   - Convert rover pose (degrees) to rotation matrix
   - Transform LiDAR points: rover-local → world coordinates
   - Formula: `world_point = pose_matrix * local_point`
   - Test: Print transformed points for verification
+
+  **Status:** COMPLETED  
+  **Priority:** High  
+  **Dependencies:** P1.3, P1.4  
+
+  **Goal:** Transform LiDAR points from rover-local to world coordinates.
+
+  **Implementation Steps:**
+  - [x] Create transformation matrices from pose data using GLM
+  - [x] Apply transformations to LiDAR points
+  - [x] Test with rover emulator data
+  - [x] Verify transformed points match expected world positions
+
+  **Completed Steps:**
+  1. Created Transform class header (`include/transform.h`) with GLM-based transformation methods
+  2. Implemented Transform class (`src/transform.cpp`) with:
+     - `poseToMatrix()` - Creates transformation matrix from PosePacket
+     - `createTransform()` - Creates transform from position and Euler angles
+     - `transformPoint()` - Transforms single points from local to world coordinates
+     - `transformLidarPoint()` - Transforms LiDAR points specifically
+     - `transformLidarPoints()` - Batch transforms multiple points
+     - Utility methods for extracting position/rotation from matrices
+  3. Created comprehensive test program (`tests/test_transform.cpp`) that:
+     - Tests basic transformations (identity, translation, rotation, combined)
+     - Receives real-time pose and LiDAR data from rover emulator
+     - Applies transformations to complete LiDAR scans
+     - Validates world coordinate bounds and transformations
+  4. Successfully tested with rover emulator:
+     - Processed 5 complete scans with proper transformation
+     - Verified world coordinates are consistent with rover pose
+     - Confirmed bounding box calculations in world space
 
 ## Step 2: Basic 3D Window (Sets up rendering for Phase 2/3)
 - [ ] **P1.6** OpenGL/GLFW window setup
