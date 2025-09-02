@@ -111,51 +111,86 @@
      - Confirmed bounding box calculations in world space
 
 ## Step 2: Basic 3D Window (Sets up rendering for Phase 2/3)
-- [ ] **P1.6** OpenGL/GLFW window setup
-  - 1280x720 window "Rover Visualization"
-  - OpenGL 4.3 core profile
+- [x] **P1.6** OpenGL/GLFW window setup ✅
+  - 1280x720 window "Rover Visualization" 
+  - OpenGL 4.1 core profile (macOS maximum)
   - Basic render loop at 60 FPS
   - Clear to dark gray background
+  - Test rendering (triangle + dots) confirms pipeline works
+  
+  **Completed Steps:**
+  - Created OpenGL window application in `src/main.cpp`
+  - GLFW initialization with proper error handling and callbacks
+  - OpenGL 4.1 Core Profile context (macOS compatibility)
+  - 60 FPS render loop with frame timing and FPS display in title
+  - ESC key handling and window resize callbacks
+  - Test graphics rendering to verify OpenGL pipeline functionality
+  - Successfully running on Apple M3 with Metal backend
 
-- [ ] **P1.7** Shader infrastructure (GPU-ready from start)
-  - Create `ShaderProgram` class
-  - Basic vertex/fragment shaders for colored points
-  - Uniforms: MVP matrix, point size, color
+## Step 2B: Clean up and verify basic visualization
+- [x] **P1.7** Basic UDP → Render pipeline ✅
+  - UDP thread receives pose/LiDAR packets on ports 9001/10001
+  - LidarAssembler builds complete 1000-point scans from 5 packets
+  - Transform class converts local LiDAR to world coordinates
+  - Thread-safe data transfer with mutex protection
+  - Successfully rendering red rover cube and cyan point cloud
 
-- [ ] **P1.8** Free-fly camera
-  - `Camera` class with position, look-at, up vectors
-  - Mouse: click-drag to rotate view
-  - Keyboard: WASD move, QE up/down, Shift to speed up
-  - Scroll: zoom in/out (adjust FOV)
-  - Start position: (0, 10, 20) looking at origin
+- [ ] **P1.8** Fix camera and improve visibility
+  - Adjust camera position to better view rover (starts ~168, 40, 186)
+  - Make points larger (5-10 pixels) and brighter colors
+  - Add depth testing to render order correctly
+  - Remove all debug console output for cleaner execution
 
-- [ ] **P1.9** Debug visualization helpers
-  - Draw XYZ axes (RGB colors, 10 units long)
-  - Draw grid on XZ plane (100x100m, 1m spacing)
-  - FPS counter in window title
+- [ ] **P1.9** Add coordinate reference helpers
+  - Draw XYZ axes at origin (RGB = XYZ, 50 units long)
+  - Draw grid on XZ plane (200x200m, 10m spacing, dim gray)
+  - Draw rover path trail (last 100 positions)
+  - Add simple text overlay: FPS and point count
 
-## Step 3: Point Cloud Rendering (Foundation for voxels)
-- [ ] **P1.10** Point cloud data structure
-  - `PointCloud` class with std::vector<glm::vec3> positions
-  - Circular buffer for historical data (keep last 1000 scans)
-  - Timestamp tracking for data freshness
+## Step 3: Interactive camera controls (before shaders)
+- [ ] **P1.10** Basic keyboard camera movement
+  - WASD to move camera in XZ plane
+  - QE to move up/down
+  - Arrow keys to rotate view
+  - R to reset camera to default position
+  - Test thoroughly with rover moving around
 
-- [ ] **P1.11** GPU buffer management (flat arrays for Phase 2 GPU)
-  - Dynamic VBO for point positions
-  - Use GL_DYNAMIC_DRAW for frequent updates
-  - Pre-allocate for ~1M points (5 rovers × 10Hz × 2000 points)
+- [ ] **P1.11** Mouse camera controls
+  - Click and drag to orbit around focus point
+  - Scroll wheel to zoom in/out
+  - Right-click drag to pan view
+  - Double-click to center on rover
 
-- [ ] **P1.12** Integrate UDP → Render pipeline
-  - Main thread: render loop
-  - Network thread: receive packets, assemble LiDAR
-  - Shared queue: thread-safe point cloud updates
-  - Mutex protection for data handoff
+- [ ] **P1.12** Camera presets
+  - 1-5 keys for preset views (top, side, follow, orbit, free)
+  - F key to toggle follow mode (camera follows rover)
+  - Smooth transitions between presets
 
-- [ ] **P1.13** Visual feedback
-  - Render rover as colored cube at pose position
-  - Render LiDAR points as dots (size = 2 pixels)
-  - Color by height: blue (low) → green → red (high)
-  - Show point count on screen (text overlay)
+## Step 4: Improve rendering quality
+- [ ] **P1.13** Point cloud improvements
+  - Color by height gradient (blue→cyan→green→yellow→red)
+  - Fade older points over time (alpha blending)
+  - Keep history of last 10 scans visible
+  - Add point size based on distance from camera
+
+- [ ] **P1.14** Performance monitoring
+  - Display render time in ms
+  - Show UDP packet receive rate
+  - Count dropped packets
+  - Monitor point cloud size
+
+## Step 5: Modern OpenGL migration (prepare for Phase 2)
+- [ ] **P1.15** Shader infrastructure
+  - Create basic vertex/fragment shader files
+  - Load and compile shaders at startup
+  - Create ShaderProgram class for management
+  - Test with simple colored triangle
+
+- [ ] **P1.16** Vertex Buffer Objects (VBO)
+  - Convert point rendering to use VBOs
+  - Dynamic buffer updates for streaming data
+  - Benchmark performance vs immediate mode
+  - Pre-allocate for 1M points
 
 ## Step 4: Performance & Robustness
 - [ ] **P1.14** Timing measurements
